@@ -1,0 +1,63 @@
+%practice 50, with sample correlation matrix
+x=[191 155;195 149;181 148;183 153;176 144;208 157;189 150;197 159;188 152;192 150;179 158;183 147;174 150;190 159;188 151;163 137;195 155;186 153;181 145;175 140;192 154;174 143;176 139;197 167;190 163];
+y=[179 145;201 152;185 149;188 149;171 142;192 152;190 149;189 152;197 159;187 151;186 148;174 147;185 152;195 157;187 158;161 130;183 158;173 148;182 146;165 137;185 152;178 147;176 143;200 158;187 150];
+%standardlize the sample
+xnorm=(x-ones(size(x,1),1)*mean(x))./(ones(size(x,1),1)*std(x));
+ynorm=(y-ones(size(y,1),1)*mean(y))./(ones(size(y,1),1)*std(y));
+s=cov([xnorm,ynorm]);
+%block s into s11, s12, s21 and s22
+s11=s(1:size(xnorm,2),1:size(xnorm,2));
+s22=s(size(xnorm,2)+1:size(s,2),size(xnorm,2)+1:size(s,2));
+s12=s(1:size(xnorm,2),size(xnorm,2)+1:size(s,2));
+s21=s12';
+S=s11^-1*s12*s22^-1*s21;
+T=s22^-1*s21*s11^-1*s12;
+[VS,DS]=eig(S);
+[VT,DT]=eig(T);
+%calculate the canonical variates and canonical correlation coefficient
+lamda=zeros(min(size(xnorm,2),size(ynorm,2)),1);
+a=zeros(size(xnorm,2),min(size(xnorm,2),size(ynorm,2)));
+b=zeros(size(ynorm,2),min(size(xnorm,2),size(ynorm,2)));
+[BS,PS]=sort(max(DS),'descend');
+[BT,PT]=sort(max(DT),'descend');
+for i=1:min(size(xnorm,2),size(ynorm,2))
+    lamda(i)=BS(i)^0.5;
+    a(:,i)=VS(:,PS(i))/(VS(:,PS(i))'*s11*VS(:,PS(i)))^0.5;
+    b(:,i)=VT(:,PT(i))/(VT(:,PT(i))'*s22*VT(:,PT(i)))^0.5;
+end
+%U1=0.5522x1*+0.5215x2*;U2=-1.3664x1*+1.3784x2*;
+%V1=-0.5044y1*-0.5383y2*;V2=-1.7686y1*+1.7586y2*; the canonical variates are different.
+%lamda1=0.7885,lamda2=0.0537; the canonical correlation coefficient is the same.
+U=(a'*xnorm')';
+V=(b'*ynorm')';
+cov([U,V]);
+for i=1:size(U,2)
+    figure;plot(U(:,i),V(:,i),'.');
+end
+Uxnorm=cov([U,xnorm]);
+Uxnorm=Uxnorm(1:size(U,2),size(U,2)+1:size(Uxnorm,2));
+Uynorm=cov([U,ynorm]);
+Uynorm=Uynorm(1:size(U,2),size(U,2)+1:size(Uynorm,2));
+Vynorm=(cov([V,ynorm]));
+Vynorm=Vynorm(1:size(V,2),size(V,2)+1:size(Vynorm,2));
+Vxnorm=(cov([V,xnorm]));
+Vxnorm=Vxnorm(1:size(V,2),size(V,2)+1:size(Vxnorm,2));
+%the varience percent of first pair canonical variates
+%lamda1^2/(lamda1^2+lamda2^2)=0.9954
+varperU1=0;
+for i=1:size(Uxnorm,2)
+    varperU1=varperU1+Uxnorm(1,i)^2/size(s11,2);
+end
+varperV1=0;
+for i=1:size(Vynorm,2)
+    varperV1=varperV1+Vynorm(1,i)^2/size(s22,2);
+end
+%the redundacy measure of first pair canonical variates
+redumeasU1=0;
+for i=1:size(Uynorm,2)
+    redumeasU1=redumeasU1+Uynorm(1,i)^2;
+end
+redumeasV1=0;
+for i=1:size(Vxnorm,2)
+    redumeasV1=redumeasV1+Vxnorm(1,i)^2;
+end
