@@ -1,0 +1,21 @@
+y=[0.88 0.85 0.79 0.86 0.85 0.83;0.87 0.92 0.85 0.83 0.9 0.8;0.84 0.78 0.81 0.8 0.85 0.83;0.81 0.86 0.9 0.87 0.78 0.79];
+ymean=mean(mean(y));
+%the division of varience
+SST=sum(sum((y-ymean).*(y-ymean)));
+SSE=sum(sum((y-mean(y,2)*ones(1,size(y,2))).*(y-mean(y,2)*ones(1,size(y,2)))));
+SSA=sum(sum((mean(y,2)*ones(1,size(y,2))-ymean).*(mean(y,2)*ones(1,size(y,2))-ymean)));
+if SST-SSA-SSE>0.01
+    error('THE DIVISION OF VARIENCE HAS A MISTAKE');
+end
+%the degrees of freedom are a-1 for SSA, n-a for SSE.
+MSA=SSA/(size(y,1)-1);
+MSE=SSE/(size(y,1)*(size(y,2)-1));
+%Ftest
+F=MSA/MSE;
+p=1-fcdf(F,size(y,1)-1,size(y,1)*(size(y,2)-1));
+if p<0.05
+    fprintf('WHEN ALPHA=0.05, THE KIND OF CATALYST HAS A NOTABLE IMPACT ON THE PRODUCTS RATE.')
+else
+    fprintf('WHEN ALPHA=0.05, THE KIND OF CATALYST HAS NO NOTABLE IMPACT ON THE PRODUCTS RATE.')
+end
+%pp=anova1(y'); to ensrue our calculation is correct.
