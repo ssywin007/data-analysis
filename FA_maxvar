@@ -1,0 +1,22 @@
+%orthogonal rotation to maximize the varience
+function [b1,b2]=maxvar(a1,a2)
+if size(a1,1)~=size(a2,1)
+    error('the dimensions of input vectors must be the same')
+end
+h=a1.*a1+a2.*a2;
+u=(a1.*a1-a2.*a2)./h;
+v=2*a1.*a2./h;
+alpha=sum(u);
+beta=sum(v);
+c=sum(u.*u-v.*v);
+d=2*sum(u.*v);
+A=c-(alpha^2-beta^2)/size(a1,1);
+B=d-2*alpha*beta/size(a1,1);
+phi=atan(B/A)/4;
+while sin(4*phi)*B<0&&phi<7/8*pi
+    phi=phi+1/4*pi;
+end
+o=[cos(phi),-sin(phi);sin(phi),cos(phi)];
+b=[a1,a2]*o;
+b1=b(:,1);
+b2=b(:,2);
