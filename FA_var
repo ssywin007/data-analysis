@@ -1,0 +1,5 @@
+%calculate the varience  of A
+function VA=V(A)
+h=sum(A.*A,2);  
+d=A.*A./(h*ones(1,size(A,2)));
+VA=sum(1/size(A,1)*sum((d-ones(size(A,1),1)*mean(d)).*(d-ones(size(A,1),1)*mean(d))));
